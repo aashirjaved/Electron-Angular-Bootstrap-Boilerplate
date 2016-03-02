@@ -7,6 +7,7 @@ var rollup = require('rollup');
 var sass = require('gulp-sass');
 var jetpack = require('fs-jetpack');
 var livereload = require('gulp-livereload');
+var wiredep = require('wiredep').stream;
 var inject = require('gulp-inject');
 var series = require('stream-series');
 var utils = require('./utils');
@@ -19,7 +20,7 @@ var destDir = projectDir.cwd('./build');
 var paths = {
     devDir: [
         // './renderer/**/*.js',
-        './**/*.html'  
+        './**/*.html'
     ],
     copyFromAppDir: [
         './node_modules/**',
@@ -37,6 +38,13 @@ gulp.task('clean', function (callback) {
     return destDir.dirAsync('.', { empty: true });
 });
 
+var injectBowerTask = function () {
+    return gulp.src(srcDir.path('app.html'))
+    .pipe(wiredep({ cwd: 'app' }))
+    .pipe(gulp.dest(srcDir.path()));
+}
+gulp.task('inject-bower', injectBowerTask);
+
 
 var copyTask = function () {
     return projectDir.copyAsync('app', destDir.path(), {
@@ -44,7 +52,7 @@ var copyTask = function () {
         matching: paths.copyFromAppDir
     });
 };
-gulp.task('copy', ['clean'], copyTask);
+gulp.task('copy', ['clean', 'inject-bower'], copyTask);
 gulp.task('copy-watch', copyTask);
 
 
