@@ -18,9 +18,56 @@ var appDir = jetpack.cwd(app.getAppPath());
 console.log('The author of this app is:', appDir.read('package.json', 'json').author);
 
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('greet').innerHTML = greet();
-    document.getElementById('platform-info').innerHTML = os.platform();
-    document.getElementById('env-name').innerHTML = env.name;
+    
 });
 
 console.log('yayyy');
+
+app.on('ready', function () {
+    
+    console.log('app.ready - jquery');
+
+    $(document).ready(function(){
+        console.log('jquery.ready');
+    })
+    
+});
+
+
+(function () {
+  'use strict';
+
+  /* @ngdoc object
+   * @name timecard
+   * @requires $urlRouterProvider
+   *
+   * @description
+   * Simple angular app 
+   *
+   */
+  angular
+    .module('timecard', [
+      'ui.router'
+    ]);
+
+  angular
+    .module('timecard')
+    .config(config);
+
+  function config($stateProvider,$urlRouterProvider) {
+    $urlRouterProvider.otherwise('/');
+    $stateProvider
+      .state('home', {
+        url: '/',
+        template: '<h3 class="text-center">hello {{ctrlName }}</h3>',
+        controller: function($scope){
+            $scope.ctrlName = 'HomeCtrl';
+             
+            console.log('home route loaded');
+        }
+      });
+  }
+  
+  console.log('angular.ready',angular);
+
+})();

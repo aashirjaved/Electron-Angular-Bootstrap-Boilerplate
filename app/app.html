@@ -1,12 +1,8 @@
 <!doctype html>
-<html>
+<html  data-ng-app='timecard'>
 <head>
     <meta charset="utf-8">
     <title>Electron Boilerplate</title>
-    
-    
-    <!-- inject:css -->
-    <!-- endinject -->
 
     <link href="./stylesheets/main.css" rel="stylesheet" type="text/css">
     
@@ -14,23 +10,18 @@
 
     <script src="vendor/electron_boilerplate/context_menu.js"></script>
     <script src="vendor/electron_boilerplate/external_links.js"></script>
-
-    <script src="app.js"></script>
+        
 </head>
 <body>
 
-    <div class="container">
-        <h1 id="greet"></h1>
-        <h3>yay</h3>
-        <p class="subtitle">
-            Welcome to <a href="http://electron.atom.io" class="js-external-link">Electron</a> app running on this magnificent <strong id="platform-info"></strong> machine.
-        </p>
-        <p class="subtitle">
-            You are in <strong id="env-name"></strong> environment.
-        </p>
+    
+    <div class='container-fluid'>
+        <div class="ui-view-container">
+            <div class="" ui-view >
+            </div>
+        </div>
     </div>
-
-
+    
     <!-- bower:js -->
     <script src="../bower_components/jquery/dist/jquery.js"></script>
     <script src="../bower_components/angular/angular.js"></script>
@@ -40,10 +31,16 @@
     <script src="../bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="../bower_components/angular-touch/angular-touch.js"></script>
     <script src="../bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+    <script src="../bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="../bower_components/bootstrap-sass/assets/javascripts/bootstrap.js"></script>
     <!-- endbower -->
     
     <!-- inject:js -->
+    <script src="app.js"></script>
     <!-- endinject -->
+    
+    
 
 </body>
+
 </html>
