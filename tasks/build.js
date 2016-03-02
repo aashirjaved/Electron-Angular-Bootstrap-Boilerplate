@@ -6,7 +6,9 @@ var gulp = require('gulp');
 var rollup = require('rollup');
 var sass = require('gulp-sass');
 var jetpack = require('fs-jetpack');
-
+var livereload = require('gulp-livereload');
+var inject = require('gulp-inject');
+var series = require('stream-series');
 var utils = require('./utils');
 var generateSpecsImportFile = require('./generate_specs_import');
 
@@ -15,6 +17,10 @@ var srcDir = projectDir.cwd('./app');
 var destDir = projectDir.cwd('./build');
 
 var paths = {
+    devDir: [
+        // './renderer/**/*.js',
+        './**/*.html'  
+    ],
     copyFromAppDir: [
         './node_modules/**',
         './vendor/**',
@@ -96,6 +102,26 @@ gulp.task('bundle', ['clean'], bundleTask);
 gulp.task('bundle-watch', bundleTask);
 
 
+var srcTask = function () {
+    return projectDir.copyAsync('app', destDir.path(), {
+        overwrite: true,
+        matching: paths.devDir
+    });
+};
+gulp.task('src-watch', srcTask);
+
+var livereloadTask = function () {
+    console.log('reload***')
+    return gulp.src([
+        // destDir.path('renderer/**/*.js'), 
+        destDir.path('**/*.html')
+    ])
+    .pipe(livereload());
+};
+gulp.task('livereload-watch', ['src-watch'], livereloadTask);
+
+
+
 
 var sassTask = function () {
     // return gulp.src('app/renderer/**/*.scss')//**
@@ -140,6 +166,9 @@ gulp.task('finalize', ['clean'], function () {
 
 
 gulp.task('watch', function () {
+    // TODO: figure out how to start app w/out 404 on livereload.js
+    livereload.listen({ reloadPage: 'app.html' });
+    gulp.watch(paths.devDir, { cwd: 'app' }, ['livereload-watch']);
     gulp.watch('app/**/*.js', ['bundle-watch']);
     gulp.watch(paths.copyFromAppDir, { cwd: 'app' }, ['copy-watch']);
     gulp.watch('app/**/*.scss', ['sass-watch']);
