@@ -23,6 +23,7 @@
     "install-native": "node ./tasks/install_native_module"
   },
   "dependencies": {
+    "electron-debug": "^0.5.2",
     "gulp-inject": "^3.0.0",
     "gulp-livereload": "^3.8.1",
     "gulp-sass": "^2.2.0",

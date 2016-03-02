@@ -23,6 +23,21 @@ var appDir = jetpack.cwd(app.getAppPath());
 
 // window.$ = window.jQuery = require("jquery");
 
+
+// import {debug} from 'electron-debug';
+
+
+// debug({
+//     showDevTools: true
+// });
+
+document.addEventListener("keydown", function (e) {
+    if (e.which === 117) {
+        require('remote').getCurrentWindow().toggleDevTools();
+    }
+});
+
+
 (function () {
   'use strict';
 
