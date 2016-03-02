@@ -26,6 +26,7 @@
     "gulp-inject": "^3.0.0",
     "gulp-livereload": "^3.8.1",
     "gulp-sass": "^2.2.0",
+    "jquery": "^2.2.1",
     "stream-series": "^0.1.1",
     "wiredep": "^3.0.0"
   }

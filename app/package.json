@@ -4,8 +4,8 @@
   "identifier": "com.example.electron-boilerplate",
   "description": "Starter for your Electron application. Out of the box ready for serious stuff.",
   "version": "0.1.0",
-  "author": "Mr Gumby",
-  "copyright": "© 2016, your company here",
+  "author": "Nathan McCartney",
+  "copyright": "© 2016, Celerity",
   "main": "background.js",
   "dependencies": {
     "fs-jetpack": "^0.7.0"
