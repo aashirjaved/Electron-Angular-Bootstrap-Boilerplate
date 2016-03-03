@@ -1,14 +1,12 @@
 'use strict';
 
 var pathUtil = require('path');
-var Q = require('q');
 var gulp = require('gulp');
-var rollup = require('rollup');
 var sass = require('gulp-sass');
+var concat = require('gulp-concat');
 var jetpack = require('fs-jetpack');
 var livereload = require('gulp-livereload');
 var wiredep = require('wiredep').stream;
-var inject = require('gulp-inject');
 var series = require('stream-series');
 var utils = require('./utils');
 var generateSpecsImportFile = require('./generate_specs_import');
@@ -19,7 +17,6 @@ var destDir = projectDir.cwd('./build');
 
 var paths = {
     devDir: [
-        // './renderer/**/*.js',
         './**/*.html'
     ],
     copyFromAppDir: [
@@ -39,6 +36,9 @@ gulp.task('clean', function (callback) {
     return destDir.dirAsync('.', { empty: true });
 });
 
+/**
+ * BOWER INJECT TASKS
+ */
 var injectBowerTask = function () {
     return gulp.src(srcDir.path('app.html'))
     .pipe(wiredep({ cwd: 'app' }))
@@ -57,60 +57,9 @@ gulp.task('copy', ['clean', 'inject-bower'], copyTask);
 gulp.task('copy-watch', copyTask);
 
 
-var bundle = function (src, dest) {
-    var deferred = Q.defer();
-
-    rollup.rollup({
-        entry: src,
-    }).then(function (bundle) {
-        var jsFile = pathUtil.basename(dest);
-        var result = bundle.generate({
-            format: 'cjs',
-            sourceMap: true,
-            sourceMapFile: jsFile,
-        });
-        // Wrap code in self invoking function so the variables don't
-        // pollute the global namespace.
-        var isolatedCode = '(function () {' + result.code + '\n}());';
-        return Q.all([
-            destDir.writeAsync(dest, isolatedCode + '\n//# sourceMappingURL=' + jsFile + '.map'),
-            destDir.writeAsync(dest + '.map', result.map.toString()),
-        ]);
-    }).then(function () {
-        deferred.resolve();
-    }).catch(function (err) {
-        console.error('Build: Error during rollup', err.stack);
-    });
-
-    return deferred.promise;
-};
-
-var bundleApplication = function () {
-    return Q.all([
-        bundle(srcDir.path('background.js'), destDir.path('background.js')),
-        bundle(srcDir.path('app.js'), destDir.path('app.js')),
-    ]);
-};
-
-var bundleSpecs = function () {
-    generateSpecsImportFile().then(function (specEntryPointPath) {
-        return Q.all([
-            bundle(srcDir.path('background.js'), destDir.path('background.js')),
-            bundle(specEntryPointPath, destDir.path('spec.js')),
-        ]);
-    });
-};
-
-var bundleTask = function () {
-    if (utils.getEnvName() === 'test') {
-        return bundleSpecs();
-    }
-    return bundleApplication();
-};
-gulp.task('bundle', ['clean'], bundleTask);
-gulp.task('bundle-watch', bundleTask);
-
-
+/**
+ * LIVERELOAD TASKS
+ */
 var srcTask = function () {
     return projectDir.copyAsync('app', destDir.path(), {
         overwrite: true,
@@ -131,14 +80,17 @@ gulp.task('livereload-watch', ['src-watch'], livereloadTask);
 
 
 
-
+/**
+ * SASS TASKS
+ */
 var sassTask = function () {
-    // return gulp.src('app/renderer/**/*.scss')//**
-    return gulp.src('app/stylesheets/**/*.scss')
+    return gulp.src([
+        srcDir.path('**/*.scss')
+    ])
     .pipe(sass())
+    .pipe(concat('main.css'))
     .pipe(gulp.dest(function() {
-        return destDir.path('stylesheets');//**
-        // return destDir.path('renderer/');//**
+        return destDir.path('css');
     }));
 };
 var sassTaskDev = function () {
@@ -147,6 +99,23 @@ var sassTaskDev = function () {
 };
 gulp.task('sass', ['clean'], sassTask);
 gulp.task('sass-watch', sassTaskDev);
+
+
+/**
+ * JAVASCRIPT RELOACTION
+ */
+var javascriptTask = function () {
+    return gulp.src('app/**/*.js')
+    .pipe(gulp.dest(function() {
+        return destDir.path();
+    }));
+};
+var javascriptTaskDev = function () {
+    return javascriptTask()
+    .pipe(livereload());
+};
+gulp.task('javascript', ['clean'], javascriptTask);
+gulp.task('javascript-watch', javascriptTaskDev);
 
 
 gulp.task('finalize', ['clean'], function () {
@@ -178,10 +147,10 @@ gulp.task('watch', function () {
     // TODO: figure out how to start app w/out 404 on livereload.js
     livereload.listen({ reloadPage: 'app.html' });
     gulp.watch(paths.devDir, { cwd: 'app' }, ['livereload-watch']);
-    gulp.watch('app/**/*.js', ['bundle-watch']);
+    gulp.watch('app/**/*.js', ['javascript-watch']);
     gulp.watch(paths.copyFromAppDir, { cwd: 'app' }, ['copy-watch']);
-    gulp.watch('app/**/*.scss', ['sass-watch']);
+    gulp.watch('app/**/*.scss', ['sass-watch']); 
 });
 
 
-gulp.task('build', ['bundle', 'sass', 'copy', 'finalize']);
+gulp.task('build', ['javascript', 'sass', 'copy', 'finalize']);

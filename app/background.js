@@ -3,51 +3,59 @@
 // It doesn't have any windows which you can see on screen, but we can open
 // window from here.
 
-import { app, BrowserWindow } from 'electron';
-import devHelper from './vendor/electron_boilerplate/dev_helper';
-import windowStateKeeper from './vendor/electron_boilerplate/window_state';
+'use strict';
 
-// Special module holding environment variables which you declared
-// in config/env_xxx.json file.
-import env from './env';
+const electron = require('electron');
+// Module to control application life.
+var app;
+if (process.type === 'renderer') {
+    app = require('electron').remote.app;
+} else {
+    app = require('electron').app;
+}
+// Module to create native browser window.
+const BrowserWindow = electron.BrowserWindow;
 
-var mainWindow;
+// Keep a global reference of the window object, if you don't, the window will
+// be closed automatically when the JavaScript object is garbage collected.
+let mainWindow;
 
-// Preserver of the window size and position between app launches.
-var mainWindowState = windowStateKeeper('main', {
-    width: 1000,
-    height: 600
-});
+function createWindow () {
+  // Create the browser window.
+  mainWindow = new BrowserWindow({width: 800, height: 600});
 
-app.on('ready', function () {
+  // and load the index.html of the app.
+  mainWindow.loadURL('file://' + __dirname + '/app.html');
 
-    mainWindow = new BrowserWindow({
-        x: mainWindowState.x,
-        y: mainWindowState.y,
-        width: mainWindowState.width,
-        height: mainWindowState.height
-    });
+  // Open the DevTools.
+  mainWindow.webContents.openDevTools();
 
-    if (mainWindowState.isMaximized) {
-        mainWindow.maximize();
-    }
+  // Emitted when the window is closed.
+  mainWindow.on('closed', function() {
+    // Dereference the window object, usually you would store windows
+    // in an array if your app supports multi windows, this is the time
+    // when you should delete the corresponding element.
+    mainWindow = null;
+  });
+}
 
-    if (env.name === 'test') {
-        mainWindow.loadURL('file://' + __dirname + '/spec.html');
-    } else {
-        mainWindow.loadURL('file://' + __dirname + '/app.html');
-    }
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+app.on('ready', createWindow);
 
-    if (env.name !== 'production') {
-        devHelper.setDevMenu();
-        mainWindow.openDevTools();
-    }
-
-    mainWindow.on('close', function () {
-        mainWindowState.saveState(mainWindow);
-    });
-});
-
+// Quit when all windows are closed.
 app.on('window-all-closed', function () {
+  // On OS X it is common for applications and their menu bar
+  // to stay active until the user quits explicitly with Cmd + Q
+  if (process.platform !== 'darwin') {
     app.quit();
+  }
+});
+
+app.on('activate', function () {
+  // On OS X it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
+  if (mainWindow === null) {
+    createWindow();
+  }
 });
