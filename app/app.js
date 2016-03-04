@@ -31,47 +31,23 @@
 //     showDevTools: true
 // });
 
-document.addEventListener("keydown", function (e) {
-    if (e.which === 117) {
-        require('remote').getCurrentWindow().toggleDevTools();
-    }
-});
 
+
+var remoteApp = require('remote');
+var app = remoteApp.app;
+var jetpack = require('fs-jetpack');
+var appDir = jetpack.cwd(app.getAppPath());
 
 (function () {
   'use strict';
-
-  /* @ngdoc object
-   * @name timecard
-   * @requires $urlRouterProvider
-   *
-   * @description
-   * Simple angular app 
-   *
-   */
-//   angular
-//     .module('timecard', [
-//       'ui.router'
-//     ]);
-
-//   angular
-//     .module('timecard')
-//     .config(config);
-
-//   function config($stateProvider,$urlRouterProvider) {
-//     $urlRouterProvider.otherwise('/');
-//     $stateProvider
-//       .state('home', {
-//         url: '/',
-//         template: '<h3 class="text-center">hello {{ctrlName }}</h3>',
-//         controller: function($scope){
-//             $scope.ctrlName = 'HomeCtrl';
-             
-//             console.log('home route loaded');
-//         }
-//       });
-//   }
   
-  console.log('angular.ready',angular);
+  console.log('The author of this app is:', appDir.read('package.json', 'json').author);
+  
+ 
+  document.addEventListener("keydown", function (e) {
+        if (e.which === 117) {
+            remoteApp.getCurrentWindow().toggleDevTools();
+        }
+    });
 
 })();
